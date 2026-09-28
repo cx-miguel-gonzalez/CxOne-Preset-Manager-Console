@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Checkmarx One Preset Manager Console{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="cx-header">
+    <div class="cx-header-inner">
+      <a class="cx-brand" href="{{ url_for('index') }}">
+        <span class="cx-brand-mark">
+          <img src="{{ url_for('static', filename='img/checkmarx-mark.png') }}" alt="Checkmarx" width="18" height="18">
+        </span>
+        <span class="cx-brand-name">Checkmarx <span class="cx-brand-name-light">Preset Manager Console</span></span>
+      </a>
+      {% if logged_in %}
+      <nav class="cx-nav">
+        <a href="{{ url_for('presets') }}">Presets</a>
+        <a href="{{ url_for('compare') }}">Compare</a>
+        <a href="{{ url_for('presets_delete') }}" class="cx-nav-danger">Delete Presets</a>
+        <form method="post" action="{{ url_for('logout') }}" class="cx-inline-form">
+          <button type="submit" class="cx-link-button">Sign out</button>
+        </form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="cx-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="cx-flash-stack">
+          {% for category, message in messages %}
+            <div class="cx-flash cx-flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if logged_in %}
+  <div id="preset-panel-backdrop" class="cx-panel-backdrop" hidden></div>
+  <aside id="preset-panel" class="cx-panel" aria-hidden="true">
+    <div class="cx-panel-header">
+      <div>
+        <h2 id="preset-panel-title">Preset</h2>
+        <div id="preset-panel-meta" class="cx-hint"></div>
+      </div>
+      <button type="button" id="preset-panel-close" class="cx-panel-close" aria-label="Close">&times;</button>
+    </div>
+    <div id="preset-panel-body" class="cx-panel-body"></div>
+  </aside>
+  {% endif %}
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

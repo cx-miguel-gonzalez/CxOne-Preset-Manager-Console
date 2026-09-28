@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set page_title = ("Update Preset: " ~ preset_name) if existing else ("Create New Preset: " ~ preset_name) %}
+{% block title %}{{ page_title }} - Preset Manager Console{% endblock %}
+{% block content %}
+<button type="button" class="cx-button cx-button-secondary cx-back-button">&larr; Back</button>
+
+<h1>{{ page_title }}</h1>
+
+{% if existing %}
+<div class="cx-warning-banner">
+  <p>
+    <strong>Warning:</strong> a preset named "{{ existing['name'] }}" already exists.
+    Continuing will <strong>update</strong> that preset (id {{ existing['id'] }}) rather than
+    create a new one.
+  </p>
+</div>
+{% else %}
+<div class="cx-card">
+  <p class="cx-hint">No existing preset matches this name &mdash; a <strong>new</strong> preset will be created.</p>
+</div>
+{% endif %}
+
+<div class="cx-card">
+  <p>Total queries: {{ total_queries }}</p>
+  <h3>Exact {{ 'PATCH' if existing else 'POST' }} payload</h3>
+  <pre class="cx-pre cx-pre-scroll">{{ payload_json }}</pre>
+
+  <form method="post" action="{{ url_for('compare_combine_apply') }}">
+    <input type="hidden" name="preset_name" value="{{ preset_name }}">
+    <input type="hidden" name="description" value="{{ description }}">
+    <input type="hidden" name="queries_json" value='{{ queries_json }}'>
+    {% if existing %}
+    <input type="hidden" name="target_preset_id" value="{{ existing['id'] }}">
+    {% endif %}
+    <button type="submit" class="cx-button cx-button-primary">Push Changes</button>
+    <button type="button" class="cx-button cx-button-secondary cx-back-button">Back</button>
+    <a class="cx-button cx-button-secondary" href="{{ url_for('presets') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

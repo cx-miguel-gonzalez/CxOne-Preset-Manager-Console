@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block body_class %}cx-danger-theme{% endblock %}
+{% block title %}Confirm Delete - Preset Manager Console{% endblock %}
+{% block content %}
+<button type="button" class="cx-button cx-button-secondary cx-back-button">&larr; Back</button>
+
+<h1>Confirm Delete</h1>
+
+<div class="cx-warning-banner">
+  <p>
+    <strong>This cannot be undone.</strong> The following {{ presets|length }} preset(s) will be
+    permanently deleted from your Checkmarx One tenant:
+  </p>
+</div>
+
+<div class="cx-card">
+  <ul>
+    {% for p in presets %}
+      <li>{{ p['name'] }} <span class="cx-hint">(id {{ p['id'] }})</span></li>
+    {% endfor %}
+  </ul>
+
+  <form method="post" action="{{ url_for('presets_delete_apply') }}">
+    {% for p in presets %}
+    <input type="hidden" name="preset_ids" value="{{ p['id'] }}">
+    {% endfor %}
+    <button type="submit" class="cx-button cx-button-primary">Delete Presets</button>
+    <button type="button" class="cx-button cx-button-secondary cx-back-button">Back</button>
+    <a class="cx-button cx-button-secondary" href="{{ url_for('presets') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% set page_title = ("Create New Preset: " ~ target_name) if is_builtin else ("Update Preset: " ~ meta['name']) %}
+{% block title %}{{ page_title }} - Preset Manager Console{% endblock %}
+{% block content %}
+<button type="button" class="cx-button cx-button-secondary cx-back-button">&larr; Back</button>
+
+<h1>{{ page_title }}</h1>
+
+{% if is_builtin %}
+<div class="cx-warning-banner">
+  <p>
+    <strong>{{ meta['name'] }}</strong> is a Built-in preset and cannot be modified.
+    Pushing these changes will create a <strong>new</strong> preset named "{{ target_name }}" instead.
+  </p>
+</div>
+{% endif %}
+
+<div class="cx-card">
+  <p>Current query count: {{ current_count }}</p>
+  <p>Resulting query count: {{ final_count }}</p>
+
+  <h3>Queries being added ({{ added|length }})</h3>
+  {% if added %}
+  <ul>
+    {% for q in added %}
+      <li>{{ q.name }} ({{ q.language }} / {{ q.group }})</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="cx-hint">No queries are being added.</p>
+  {% endif %}
+
+  <h3>Queries being removed ({{ removed|length }})</h3>
+  {% if removed %}
+  <ul>
+    {% for q in removed %}
+      <li>{{ q.name }} ({{ q.language }} / {{ q.group }})</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="cx-hint">No queries are being removed.</p>
+  {% endif %}
+
+  <h3>Exact {{ 'POST' if is_builtin else 'PATCH' }} payload</h3>
+  <p class="cx-hint">Queries are grouped by family, matching Checkmarx One's own preset-creation request shape.</p>
+  <pre class="cx-pre cx-pre-scroll">{{ payload_json }}</pre>
+
+  <form method="post" action="{{ url_for('preset_update_confirm', preset_id=meta['id']) }}">
+    <input type="hidden" name="final_by_family_json" value='{{ final_by_family_json }}'>
+    <input type="hidden" name="description" value="{{ target_description }}">
+    {% if is_builtin %}
+    <input type="hidden" name="new_preset_name" value="{{ new_preset_name }}">
+    {% endif %}
+    <button type="submit" class="cx-button cx-button-primary">Push Changes</button>
+    <button type="button" class="cx-button cx-button-secondary cx-back-button">Back</button>
+    <a class="cx-button cx-button-secondary" href="{{ url_for('presets') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

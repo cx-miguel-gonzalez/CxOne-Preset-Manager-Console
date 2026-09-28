@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block body_class %}cx-danger-theme{% endblock %}
+{% block title %}Delete Presets - Preset Manager Console{% endblock %}
+{% block content %}
+<h1>Delete Presets</h1>
+
+<div class="cx-warning-banner">
+  <p>
+    <strong>Warning:</strong> deleting a preset removes it from your Checkmarx One tenant
+    and cannot be undone. Only Custom presets are listed here &mdash; Built-in presets
+    cannot be deleted.
+  </p>
+</div>
+
+{% if not presets %}
+  <div class="cx-card">
+    <p>No Custom presets cached yet. Sync from the Presets page first.</p>
+  </div>
+{% else %}
+<div class="cx-toolbar">
+  <input type="search" id="preset-search" class="cx-search-input" placeholder="Filter by name or description…">
+</div>
+
+<form method="post" action="{{ url_for('presets_delete_confirm') }}">
+  <div class="cx-page-header">
+    <label class="cx-checkbox-inline">
+      <input type="checkbox" id="delete-select-all">
+      <span>Select all</span>
+    </label>
+    <button type="submit" class="cx-button cx-button-primary" id="delete-selected-button" disabled>
+      Delete selected (0)
+    </button>
+  </div>
+
+  <div class="cx-card cx-card-flush">
+    <table class="cx-table" id="presets-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th data-sort-key="name" class="cx-sortable">Name</th>
+          <th data-sort-key="description" class="cx-sortable">Description</th>
+          <th data-sort-key="synced" class="cx-sortable">Last synced</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in presets %}
+        <tr
+          data-name="{{ p['name'] }}"
+          data-description="{{ p['description'] or '' }}"
+          data-synced="{{ p['synced_at'] }}"
+        >
+          <td>
+            <input type="checkbox" class="cx-delete-checkbox" name="selected_preset_ids" value="{{ p['id'] }}">
+          </td>
+          <td>{{ p['name'] }}</td>
+          <td>{{ p['description'] or '' }}</td>
+          <td>{{ p['synced_at'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

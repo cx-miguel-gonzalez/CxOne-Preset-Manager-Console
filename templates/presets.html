@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Presets - Preset Manager Console{% endblock %}
+{% block content %}
+<div class="cx-page-header">
+  <h1>SAST Presets</h1>
+  <div class="cx-button-row">
+    <button type="button" class="cx-button cx-button-primary" data-sync-trigger
+      data-start-url="{{ url_for('sync_start') }}" data-status-url="{{ url_for('sync_status') }}">
+      Sync from tenant
+    </button>
+    <button type="button" class="cx-button cx-button-secondary" data-sync-trigger data-refresh-catalog="1"
+      data-start-url="{{ url_for('sync_start') }}" data-status-url="{{ url_for('sync_status') }}">
+      Refresh query catalog
+    </button>
+  </div>
+</div>
+
+<div id="sync-progress" class="cx-card cx-sync-progress" hidden>
+  <div class="cx-progress-track">
+    <div id="sync-progress-bar" class="cx-progress-bar" style="width: 0%"></div>
+  </div>
+  <p id="sync-progress-label" class="cx-hint">Starting…</p>
+</div>
+
+<div class="cx-legend">
+  <span class="cx-badge cx-badge-builtin">Built-in</span>
+  <span class="cx-badge cx-badge-custom">Custom</span>
+</div>
+
+{% if not presets %}
+  <div class="cx-card">
+    <p>No presets cached yet. Click <strong>Sync from tenant</strong> to pull the latest presets.</p>
+  </div>
+{% else %}
+<div class="cx-toolbar">
+  <input type="search" id="preset-search" class="cx-search-input" placeholder="Filter by name or description…">
+  <select id="type-filter" class="cx-select">
+    <option value="all">All types</option>
+    <option value="builtin">Built-in only</option>
+    <option value="custom">Custom only</option>
+  </select>
+</div>
+
+<form method="get" action="{{ url_for('compare') }}" id="compare-form">
+  <input type="hidden" name="a" id="compare-input-a" value="">
+  <input type="hidden" name="b" id="compare-input-b" value="">
+  <div class="cx-card cx-card-flush">
+    <table class="cx-table" id="presets-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th data-sort-key="name" class="cx-sortable">Name</th>
+          <th data-sort-key="type" class="cx-sortable">Type</th>
+          <th data-sort-key="description" class="cx-sortable">Description</th>
+          <th data-sort-key="synced" class="cx-sortable">Last synced</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in presets %}
+        <tr
+          data-name="{{ p['name'] }}"
+          data-type="{{ 'custom' if p['is_custom'] else 'builtin' }}"
+          data-description="{{ p['description'] or '' }}"
+          data-synced="{{ p['synced_at'] }}"
+        >
+          <td><input type="checkbox" class="compare-checkbox" data-id="{{ p['id'] }}"></td>
+          <td>
+            <button type="button" class="cx-link-button cx-preset-name" data-preset-id="{{ p['id'] }}">{{ p['name'] }}</button>
+          </td>
+          <td>
+            {% if p['is_custom'] %}
+              <span class="cx-badge cx-badge-custom">Custom</span>
+            {% else %}
+              <span class="cx-badge cx-badge-builtin">Built-in</span>
+            {% endif %}
+          </td>
+          <td>{{ p['description'] or '' }}</td>
+          <td>{{ p['synced_at'] }}</td>
+          <td class="cx-row-action">
+            <a class="cx-button cx-button-secondary cx-button-small" href="{{ url_for('preset_export_json', preset_id=p['id']) }}">Export JSON</a>
+          </td>
+          <td class="cx-row-action">
+            <a class="cx-button cx-button-secondary cx-button-small" href="{{ url_for('preset_update', preset_id=p['id']) }}">Update</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <button type="submit" id="compare-button" class="cx-button cx-button-secondary" disabled>Compare selected (0/2)</button>
+</form>
+{% endif %}
+{% endblock %}

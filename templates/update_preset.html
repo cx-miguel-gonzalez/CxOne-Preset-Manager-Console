@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Update {{ meta['name'] }} - Preset Manager Console{% endblock %}
+{% block content %}
+<button type="button" class="cx-button cx-button-secondary cx-back-button">&larr; Back</button>
+
+<h1>Update preset: {{ meta['name'] }}</h1>
+<p class="cx-hint">{{ total_queries }} queries currently selected.</p>
+
+{% if not meta['is_custom'] %}
+<div class="cx-warning-banner">
+  <p>
+    <strong>Built-in presets cannot be modified.</strong> Continuing will create a
+    <strong>new</strong> preset containing your selected queries instead of changing this one.
+    You'll be asked to name the new preset below.
+  </p>
+</div>
+{% endif %}
+
+<form method="post" id="update-preset-form">
+  <div class="cx-card cx-card-narrow">
+    {% if not meta['is_custom'] %}
+    <label class="cx-field">
+      <span>New Preset Name</span>
+      <input type="text" name="new_preset_name" required placeholder="Name for the new preset">
+    </label>
+    {% endif %}
+    <label class="cx-field">
+      <span>Description</span>
+      <textarea name="description" rows="2">{{ meta['description'] or '' }}</textarea>
+    </label>
+  </div>
+
+  <div class="cx-page-header">
+    <label class="cx-checkbox-inline">
+      <input type="checkbox" id="update-select-all">
+      <span>Select all</span>
+    </label>
+    <button type="submit" class="cx-button cx-button-primary">Preview changes</button>
+  </div>
+
+  {% if not catalog %}
+  <div class="cx-card">
+    <p>No queries in the local query catalog yet. Sync (or refresh the query catalog) from the Presets page first.</p>
+  </div>
+  {% endif %}
+
+  {% for language, categories in catalog.items() %}
+  <details class="cx-collapsible">
+    <summary>
+      <span class="cx-collapsible-title">{{ language }}</span>
+      <span class="cx-count"></span>
+    </summary>
+    <div class="cx-collapsible-body">
+      {% for category, queries in categories.items() %}
+      <details class="cx-collapsible cx-collapsible-nested">
+        <summary>
+          <span class="cx-collapsible-title">{{ category }}</span>
+          <span class="cx-count"></span>
+        </summary>
+        <ul>
+          {% for q in queries %}
+          <li>
+            <label class="cx-checkbox-inline">
+              <input type="checkbox" class="cx-update-checkbox" name="selected_query_ids"
+                value="{{ q.queryId }}" {% if q.queryId in current_ids %}checked{% endif %}>
+              <span>{{ q.name }}</span>
+            </label>
+          </li>
+          {% endfor %}
+        </ul>
+      </details>
+      {% endfor %}
+    </div>
+  </details>
+  {% endfor %}
+</form>
+{% endblock %}

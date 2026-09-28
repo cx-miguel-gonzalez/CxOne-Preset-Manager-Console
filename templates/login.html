@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Sign in - Preset Manager Console{% endblock %}
+{% block content %}
+<div class="cx-card cx-card-narrow">
+  <h1>Connect to your Checkmarx One tenant</h1>
+
+  {% if env_config %}
+  <div class="cx-env-login">
+    <p>
+      Found credentials in <code>.env</code> for tenant <strong>{{ env_config.tenant }}</strong>
+      ({{ "API Key" if env_config.auth_method == "api_key" else "Client ID / Secret" }}).
+    </p>
+    <form method="post" action="{{ url_for('login_env') }}">
+      <button type="submit" class="cx-button cx-button-primary">Sign in using .env credentials</button>
+    </form>
+  </div>
+  <div class="cx-divider"><span>or enter manually</span></div>
+  {% endif %}
+
+  <form method="post">
+    <fieldset class="cx-fieldset">
+      <legend>Tenant</legend>
+      <label class="cx-field">
+        <span>Tenant name</span>
+        <input type="text" name="tenant" placeholder="my-tenant" required>
+      </label>
+      <label class="cx-field">
+        <span>API base URL</span>
+        <input type="text" name="base_url" value="{{ default_base_url }}">
+      </label>
+      <label class="cx-field">
+        <span>IAM URL</span>
+        <input type="text" name="iam_url" value="{{ default_iam_url }}">
+      </label>
+    </fieldset>
+
+    <fieldset class="cx-fieldset">
+      <legend>Authentication</legend>
+      <div class="cx-radio-row">
+        <label class="cx-radio">
+          <input type="radio" name="auth_method" value="api_key" checked>
+          <span>API Key</span>
+        </label>
+        <label class="cx-radio">
+          <input type="radio" name="auth_method" value="client_credentials">
+          <span>Client ID / Client Secret</span>
+        </label>
+      </div>
+
+      <label class="cx-field">
+        <span>API Key</span>
+        <input type="password" name="api_key" autocomplete="off">
+      </label>
+      <label class="cx-field">
+        <span>Client ID</span>
+        <input type="text" name="client_id" autocomplete="off">
+      </label>
+      <label class="cx-field">
+        <span>Client Secret</span>
+        <input type="password" name="client_secret" autocomplete="off">
+      </label>
+    </fieldset>
+
+    <button type="submit" class="cx-button cx-button-primary">Sign in</button>
+  </form>
+  <p class="cx-hint">Credentials are held in server memory for this session only and are never written to disk.</p>
+</div>
+{% endblock %}
