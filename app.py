@@ -496,10 +496,18 @@ def compare_combine():
 def compare_combine_export_csv():
     preset_name = request.form.get("preset_name", "").strip() or "Combined Preset"
     queries_json = request.form.get("queries_json", "[]")
+    # Maximum number of queries allowed in a single export to prevent
+    # denial-of-service via excessively large loop iterations (CWE-606).
+    MAX_EXPORT_QUERIES = 10_000
+
     try:
         final_list = json.loads(queries_json)
     except json.JSONDecodeError:
         flash("Could not read the combined query list; please try again.", "error")
+        return redirect(url_for("presets"))
+
+    if not isinstance(final_list, list) or len(final_list) > MAX_EXPORT_QUERIES:
+        flash("The query list is invalid or too large to export.", "error")
         return redirect(url_for("presets"))
 
     csv_text = queries_to_csv(final_list)
